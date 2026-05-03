@@ -1,5 +1,5 @@
 # 🎮 Gamified Task Manager    
-
+ 
 <p align="center">
   <img src="https://readme-typing-svg.herokuapp.com?size=28&duration=2500&color=00F7FF&center=true&vCenter=true&width=650&lines=Gamify+Your+Tasks+🎮;Earn+XP+%7C+Level+Up+🚀;React+Project+with+Cool+UI+🔥" />
 </p>
