@@ -1,34 +1,28 @@
 import React from "react";
 
-const Stats = ({ xp, level, totalTasks, completedTasks }) => {
-  let badge = "Beginner 🟢";
-
-  if (xp >= 100) badge = "Focused Learner 🔵";
-  if (xp >= 300) badge = "Productivity Pro 🟣";
-  if (xp >= 500) badge = "Task Master 🏆";
-
+const Stats = ({ xp, level, completedTasks, totalTasks, coins }) => {
   return (
     <div className="stats">
-      <div className="stat-card">
+      <div>
         <h3>XP</h3>
         <p>{xp}</p>
       </div>
 
-      <div className="stat-card">
+      <div>
         <h3>Level</h3>
         <p>{level}</p>
       </div>
 
-      <div className="stat-card">
+      <div>
         <h3>Tasks</h3>
         <p>
           {completedTasks}/{totalTasks}
         </p>
       </div>
 
-      <div className="stat-card">
-        <h3>Badge</h3>
-        <p>{badge}</p>
+      <div>
+        <h3>Coins</h3>
+        <p>{coins}</p>
       </div>
     </div>
   );

@@ -4,11 +4,11 @@ const ProgressBar = ({ xp }) => {
   const progress = xp % 100;
 
   return (
-    <div className="progress-section">
+    <div className="progress-area">
       <p>Progress to next level</p>
 
-      <div className="bar">
-        <div className="fill" style={{ width: `${progress}%` }}></div>
+      <div className="xp-bar">
+        <div style={{ width: `${progress}%` }}></div>
       </div>
 
       <small>{progress}/100 XP</small>

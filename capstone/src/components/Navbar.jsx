@@ -1,22 +1,23 @@
 import React from "react";
 
-const Navbar = ({ darkMode, setDarkMode, username, logoutUser }) => {
+const Navbar = ({ username, logoutUser, coins }) => {
   return (
-    <div className="navbar">
-      <h2>⚡ Neon Task Quest</h2>
+    <nav className="navbar">
+      <div className="logo">⚔️ QuestBoard</div>
 
-      <div className="nav-actions">
-        <span>Hello, {username}</span>
-
-        <button onClick={() => setDarkMode(!darkMode)}>
-          {darkMode ? "☀ Light" : "🌙 Dark"}
-        </button>
-
-        <button className="logout" onClick={logoutUser}>
-          Logout
-        </button>
+      <div className="nav-links">
+        <span>Tasks</span>
+        <span>Inventory</span>
+        <span>Challenges</span>
+        <span>Rewards</span>
       </div>
-    </div>
+
+      <div className="nav-user">
+        <span>🪙 {coins}</span>
+        <span>{username}</span>
+        <button onClick={logoutUser}>Logout</button>
+      </div>
+    </nav>
   );
 };
 

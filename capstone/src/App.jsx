@@ -5,6 +5,7 @@ import Taskinput from "./components/Taskinput";
 import Tasklist from "./components/Tasklist";
 import Stats from "./components/Stats";
 import ProgressBar from "./components/ProgressBar";
+import RewardShop from "./components/RewardShop";
 import "./App.css";
 
 const App = () => {
@@ -12,26 +13,23 @@ const App = () => {
     JSON.parse(localStorage.getItem("isLoggedIn")) || false
   );
 
-  const [username, setUsername] = useState(
-    localStorage.getItem("username") || ""
-  );
+  const [username, setUsername] = useState(localStorage.getItem("username") || "");
 
   const [tasks, setTasks] = useState(
     JSON.parse(localStorage.getItem("tasks")) || []
   );
 
   const [xp, setXp] = useState(JSON.parse(localStorage.getItem("xp")) || 0);
-  const [darkMode, setDarkMode] = useState(true);
-  const [filter, setFilter] = useState("all");
+  const [coins, setCoins] = useState(JSON.parse(localStorage.getItem("coins")) || 0);
   const [search, setSearch] = useState("");
-  const [sort, setSort] = useState("newest");
 
   useEffect(() => {
     localStorage.setItem("tasks", JSON.stringify(tasks));
     localStorage.setItem("xp", JSON.stringify(xp));
+    localStorage.setItem("coins", JSON.stringify(coins));
     localStorage.setItem("isLoggedIn", JSON.stringify(isLoggedIn));
     localStorage.setItem("username", username);
-  }, [tasks, xp, isLoggedIn, username]);
+  }, [tasks, xp, coins, isLoggedIn, username]);
 
   const loginUser = (name) => {
     setUsername(name);
@@ -53,106 +51,127 @@ const App = () => {
   };
 
   const completeTask = (id) => {
-    const updated = tasks.map((task) => {
+    const updatedTasks = tasks.map((task) => {
       if (task.id === id && !task.done) {
-        setXp((prev) => prev + calculateXP(task.priority));
+        const earnedXP = calculateXP(task.priority);
+        setXp((prev) => prev + earnedXP);
+        setCoins((prev) => prev + Math.floor(earnedXP / 5));
         return { ...task, done: true };
       }
       return task;
     });
 
-    setTasks(updated);
+    setTasks(updatedTasks);
   };
 
   const deleteTask = (id) => {
     setTasks(tasks.filter((task) => task.id !== id));
   };
 
+  const editTask = (id, updatedData) => {
+    setTasks(
+      tasks.map((task) =>
+        task.id === id ? { ...task, ...updatedData } : task
+      )
+    );
+  };
+
+  const buyReward = (price) => {
+    if (coins < price) {
+      alert("Not enough coins!");
+      return;
+    }
+
+    setCoins(coins - price);
+    alert("Reward purchased!");
+  };
+
   const resetAll = () => {
     setTasks([]);
     setXp(0);
+    setCoins(0);
   };
 
+  const level = Math.floor(xp / 100) + 1;
   const completedTasks = tasks.filter((task) => task.done).length;
-  const level = Math.floor(xp / 100);
-  const streak = completedTasks;
 
-  let filteredTasks = tasks.filter((task) => {
-    if (filter === "completed") return task.done;
-    if (filter === "pending") return !task.done;
-    return true;
-  });
-
-  filteredTasks = filteredTasks.filter((task) =>
+  const filteredTasks = tasks.filter((task) =>
     task.text.toLowerCase().includes(search.toLowerCase())
   );
 
-  if (sort === "priority") {
-    const order = { High: 1, Medium: 2, Low: 3 };
-    filteredTasks.sort((a, b) => order[a.priority] - order[b.priority]);
-  }
-
-  if (sort === "oldest") {
-    filteredTasks.sort((a, b) => a.id - b.id);
-  }
+  const habits = filteredTasks.filter((task) => task.category === "Habit");
+  const dailies = filteredTasks.filter((task) => task.category === "Daily");
+  const todos = filteredTasks.filter((task) => task.category === "To Do");
 
   if (!isLoggedIn) {
     return <Login loginUser={loginUser} />;
   }
 
   return (
-    <div className={darkMode ? "app dark" : "app light"}>
-      <Navbar
-        darkMode={darkMode}
-        setDarkMode={setDarkMode}
-        username={username}
-        logoutUser={logoutUser}
-      />
+    <div className="app">
+      <Navbar username={username} logoutUser={logoutUser} coins={coins} />
 
-      <div className="container">
-        <Stats
-          xp={xp}
-          level={level}
-          totalTasks={tasks.length}
-          completedTasks={completedTasks}
-          streak={streak}
-        />
+      <section className="hero">
+        <div className="avatar-box">
+          <div className="avatar">🧙‍♂️</div>
+          <h2>{username}</h2>
+          <p>Level {level} Productivity Warrior</p>
+        </div>
 
-        <ProgressBar xp={xp} />
+        <div className="hero-stats">
+          <Stats
+            xp={xp}
+            level={level}
+            completedTasks={completedTasks}
+            totalTasks={tasks.length}
+            coins={coins}
+          />
+          <ProgressBar xp={xp} />
+        </div>
+      </section>
 
-        <Taskinput addTask={addTask} />
-
-        <div className="controls">
+      <main className="dashboard">
+        <div className="top-tools">
           <input
             type="text"
-            placeholder="Search task..."
+            placeholder="Search your quests..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
 
-          <select value={filter} onChange={(e) => setFilter(e.target.value)}>
-            <option value="all">All Tasks</option>
-            <option value="pending">Pending</option>
-            <option value="completed">Completed</option>
-          </select>
-
-          <select value={sort} onChange={(e) => setSort(e.target.value)}>
-            <option value="newest">Newest</option>
-            <option value="oldest">Oldest</option>
-            <option value="priority">Priority</option>
-          </select>
-
-          <button className="reset" onClick={resetAll}>
-            Reset
-          </button>
+          <button onClick={resetAll}>Reset</button>
         </div>
 
-        <Tasklist
-          tasks={filteredTasks}
-          completeTask={completeTask}
-          deleteTask={deleteTask}
-        />
-      </div>
+        <Taskinput addTask={addTask} />
+
+        <div className="columns">
+          <Tasklist
+            title="Habits"
+            tasks={habits}
+            completeTask={completeTask}
+            deleteTask={deleteTask}
+            editTask={editTask}
+          />
+
+          <Tasklist
+            title="Dailies"
+            tasks={dailies}
+            completeTask={completeTask}
+            deleteTask={deleteTask}
+            editTask={editTask}
+          />
+
+          <Tasklist
+            title="To Do's"
+            tasks={todos}
+            completeTask={completeTask}
+            deleteTask={deleteTask}
+            editTask={editTask}
+          />
+
+          <RewardShop coins={coins} buyReward={buyReward} />
+        </div>
+      </main>
     </div>
   );
 };
